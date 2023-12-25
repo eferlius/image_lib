@@ -17,8 +17,11 @@ def compute_line_inside_img(x, m, q, miny, maxy):
              
 class blob_properties:
     def __init__(self, contour = None, img = None):
+
+        self.simple_blob = simple_blob(contour)
         self.contour_area = cv2.contourArea(contour)
         self.contour_perimeter = cv2.arcLength(contour,True) # boolean if closed contour perimeter
+        self.contour_compactness  = self.contour_area / self.contour_perimeter
         self.convexity = cv2.isContourConvex(contour)
 
         # bounding rectangle
@@ -48,8 +51,13 @@ class blob_properties:
 
     def create_dictionary(self):
         dictionary = {}
+        dictionary['simple_blob_xc'] = self.simple_blob.xc
+        dictionary['simple_blob_yc'] = self.simple_blob.yc
+
         dictionary['contour_area'] = self.contour_area
         dictionary['contour_perimeter'] = self.contour_perimeter
+        dictionary['contour_compactness'] = self.contour_compactness
+
         dictionary['convexity'] = self.convexity
 
         dictionary['bound_rect_x0'] = self.bound_rect.x0
@@ -99,7 +107,28 @@ class blob_properties:
         dictionary['fit_line_xr'] = self.fit_line.xr
         dictionary['fit_line_yr'] = self.fit_line.yr
 
-        return dictionary      
+        return dictionary 
+    
+class simple_blob:
+    def __init__(self, contour):
+        # Calculate the moments
+        moments = cv2.moments(contour)
+
+        # Calculate the centroid
+        if moments['m00'] != 0:
+            self.xc = int(moments['m10'] / moments['m00'])
+            self.yc = int(moments['m01'] / moments['m00'])
+        else:
+            self.xc = None
+            self.yc = None
+            
+    def draw_on_img(self, img, colour = None):
+        if not self.xc or not self.yc:
+            pass
+        else:
+            if not colour:
+                colour = utils.colour_according_to_img(img)
+            cv2.circle(img, (self.xc, self.yc), radius=3, color=colour, thickness=-1)
 
 class bounding_rectangle:
     def __init__(self, contour):
@@ -205,14 +234,17 @@ def compute_blob_properties_to_dict(contour, img):
 
     Returns
     -------
-    blob_properties object with all the attributes of the blob associated to that contour
+    blob_properties dictionary with all the attributes of the blob associated to that contour
     '''
     # just a reminder
     # list(compute_blob_properties_to_dict(contour, img).keys())
     # list(compute_blob_properties_to_dict(contour, img).values())
-    return compute_blob_properties_to_obj(contour, img).dictionary
+    return blob_properties(contour, img).dictionary
 
-def compute_blobs_properties_to_df(contours, img, show = False):
+def convert_blob_properties_obj_to_dict(blob_properties_obj):
+    return blob_properties_obj.dictionary
+
+def compute_blobs_properties_to_df(contours, img, show = False, return_also_image = False):
     '''
     Given a list of contours, for each one computes the blob properties
     Returns a pandas dataframe containing all the properties of each blob
@@ -229,8 +261,8 @@ def compute_blobs_properties_to_df(contours, img, show = False):
     -------
     Pandas dataframe containing all the properties of each blob
     '''
-    rows = []
-    rows_obj = []
+    rows = [] # for the dataframe
+    rows_obj = [] # for drawing
     for contour in contours:
         try:
             output = compute_blob_properties_to_obj(contour, img)
@@ -239,12 +271,16 @@ def compute_blobs_properties_to_df(contours, img, show = False):
         except:
             pass
     df = pd.DataFrame(rows, columns = list(output.dictionary.keys()))
-    if show:
+    df.insert(0, 'blob num', np.arange(0,df.shape[0]))
+    if show or return_also_image:
         img_plot = draw_blobs_on_img(img, rows_obj)
-        plots_image.plot_image(img_plot, 'blobs detected')
+        if show: 
+            plots_image.plot_image(img_plot, 'blobs detected')
+        if return_also_image:
+            return df, img_plot
     return df
 
-def compute_blobs_properties_to_list_of_obj(contours, img, show = False):
+def compute_blobs_properties_to_list_of_obj(contours, img, show = False, return_also_image = False):
     '''
     Given a list of contours, for each one computes the blob properties
     Returns a list of blob_properties objects
@@ -267,10 +303,24 @@ def compute_blobs_properties_to_list_of_obj(contours, img, show = False):
             rows_obj.append(compute_blob_properties_to_obj(contour, img))
         except:
             pass
-    if show:
+    if show or return_also_image:
         img_plot = draw_blobs_on_img(img, rows_obj)
-        plots_image.plot_image(img_plot, 'blobs detected')
+        if show: 
+            plots_image.plot_image(img_plot, 'blobs detected')
+        if return_also_image:
+            return rows_obj, img_plot
     return rows_obj
+
+def convert_blobs_properties_list_of_obj_to_df(list_of_obj):
+    rows = [] # for the dataframe
+    for obj in list_of_obj:
+        try:
+            rows.append(list(obj.dictionary.values()))
+        except:
+            pass
+    df = pd.DataFrame(rows, columns = list(obj.dictionary.keys()))
+    df.insert(0, 'blob num', np.arange(0,df.shape[0]))
+    return df
 
 def draw_blob_on_img(img, blob_properties_obj, colour = None, thickness = 2):
     '''
@@ -303,7 +353,8 @@ def draw_blob_on_img(img, blob_properties_obj, colour = None, thickness = 2):
         colour2 = [10, 10, 200]
         colour3 = [200, 10, 200]
         colour4 = [200, 200, 10]
-        colour = [colour0, colour1, colour2, colour3, colour4]
+        colour5 = [10, 200, 200]
+        colour = [colour0, colour1, colour2, colour3, colour4, colour5]
         
     img_copy = img.copy()
     blob_properties_obj.bound_rect.draw_on_img(img_copy, colour[0], thickness)
@@ -311,6 +362,7 @@ def draw_blob_on_img(img, blob_properties_obj, colour = None, thickness = 2):
     blob_properties_obj.ellipse.draw_on_img(img_copy, colour[2], thickness)
     blob_properties_obj.min_enc_circle.draw_on_img(img_copy, colour[3], thickness)
     blob_properties_obj.fit_line.draw_on_img(img_copy, colour[4], int(thickness/2))
+    blob_properties_obj.simple_blob.draw_on_img(img_copy, colour[5])
     return img_copy
 
 def draw_blobs_on_img(img, list_of_blob_properties_obj, colour = None, thickness = 2):
@@ -344,7 +396,7 @@ def draw_blobs_on_img(img, list_of_blob_properties_obj, colour = None, thickness
         i+=1
         img_copy = draw_blob_on_img(img_copy, blob_properties_obj, colour, thickness)
         cv2.putText(img_copy, str(i), (int(blob_properties_obj.fit_line.xf), int(blob_properties_obj.fit_line.yf)), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, [255, 0, 0], 2, cv2.LINE_AA)
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, [255, 0, 0], thickness, cv2.LINE_AA)
     return img_copy
 
 

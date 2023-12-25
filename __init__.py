@@ -1,4 +1,6 @@
 from . import blob_analysis
+from . import blob_analysis_skimage
+from . import blob_analysis_cv2_simpleBlobDetector
 from . import coords_on_image
 from . import crop_image
 from . import filter_image

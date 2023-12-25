@@ -3,7 +3,23 @@ import numpy as np
 from . import _check_
 from . import plots_image
 
-def erode_dilate(img, list_kernel_erosion, list_kernel_dilation, start_with = 'erosion', show = False):
+def erode(img, kernel, show = False, sharex = True, sharey = True,
+                   nrows = 0, ncols = 0, mainTitle = None):
+    img_ed = cv2.erode(img, kernel)
+    if show:
+        plots_image.plot_images_comparison(img, img_ed, sharex = sharex, sharey = sharey,
+                           nrows = nrows, ncols = ncols, mainTitle = mainTitle)
+    return img_ed
+
+def dilate(img, kernel, show = False, sharex = True, sharey = True,
+                   nrows = 0, ncols = 0, mainTitle = None):
+    img_ed = cv2.dilate(img, kernel)
+    if show:
+        plots_image.plot_images_comparison(img, img_ed, sharex = sharex, sharey = sharey,
+                   nrows = nrows, ncols = ncols, mainTitle = mainTitle)
+    return img_ed
+
+def erode_dilate(img, list_kernel_erosion, list_kernel_dilation, start_with = 'erosion', show = False, mainTitle = None):
     # EROSION_KERNEL = np.ones((5, 5), np.uint8) 
     # DILATATION_KERNEL = np.ones((15, 15), np.uint8)
 
@@ -33,25 +49,32 @@ def erode_dilate(img, list_kernel_erosion, list_kernel_dilation, start_with = 'e
     
     if show: 
         # call function for image show
+        if not mainTitle:
+            mainTitle = 'result of erosion and dilation'
         plots_image.plot_imagesDict_subplots(imagesDict,
-        mainTitle = 'result of erosion and dilation')
+        mainTitle = mainTitle)
+        
+        if not mainTitle:
+            mainTitle = 'comparison of erosion and dilation process'
+        plots_image.plot_images_comparison(imagesDict['orig'], img, mainTitle = mainTitle)
 
-        imagesDictComparison = {}
-        imagesDictComparison['orig'] = imagesDict['orig']
-        imagesDictComparison['final'] = img
-        comparison = img/2 - imagesDict['orig']/2
-        if len(comparison.shape) == 3:
-            imagesDictComparison['comparison'] = comparison[:,:,0]
-        else:
-            imagesDictComparison['comparison'] = comparison
+        # imagesDictComparison = {}
+        # imagesDictComparison['orig'] = imagesDict['orig']
+        # imagesDictComparison['final'] = img
+        # comparison = img/2 - imagesDict['orig']/2
+        # if len(comparison.shape) == 3:
+        #     imagesDictComparison['comparison'] = comparison[:,:,0]
+        # else:
+        #     imagesDictComparison['comparison'] = comparison
+            
 
-        plots_image.plot_imagesDict_subplots(imagesDictComparison,
-        mainTitle = 'comparison of erosion and dilation process')
+        # plots_image.plot_imagesDict_subplots(imagesDictComparison,
+        # mainTitle = mainTitle)
 
     return img
         
-def erode_dilate_loop(img, kernel_erosion, kernel_dilation, n_loops = 3, start_with = 'erosion', show = False):
-    return erode_dilate(img, [kernel_erosion]*n_loops, [kernel_dilation]*n_loops, start_with = start_with, show = show )
+def erode_dilate_loop(img, kernel_erosion, kernel_dilation, n_loops = 3, start_with = 'erosion', show = False, mainTitle = None):
+    return erode_dilate(img, [kernel_erosion]*n_loops, [kernel_dilation]*n_loops, start_with = start_with, show = show, mainTitle = mainTitle)
 
 
 def rotate(img, angle, pivot, keep_whole_image = False, show = False):

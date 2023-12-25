@@ -69,7 +69,7 @@ def get_coords_user_contour(img, nPoints = -1, select = 'inside', exclusion_colo
     br = [w, h]
 
     while True:
-        fig, ax = plots_image.plot_image(orig_img, title = title+'select the {} points'.format(nPoints))
+        fig, ax = plots_image.plot_image(orig_img, mainTitle = title+'select the {} points'.format(nPoints))
         coords_tuple = plt.ginput(n=nPoints, timeout=-1, show_clicks=True)
         tl, br = coords_on_image.from_coords_tuple_to_tl_br(coords_tuple, returnInt = False)
         coords_list = coords_on_image.from_coords_tuple_to_list_coords(coords_tuple, returnInt = False)
@@ -137,7 +137,7 @@ def manual_point_definition(img, dx = 100, dy = 100, max_pixel_rescale = 800,
 
     while True:
         img_for_drawing = orig_img.copy()
-        fig, ax = plots_image.plot_image(orig_img, title = 'The second click will be considered. Use the first one to zoom')
+        fig, ax = plots_image.plot_image(orig_img, mainTitle = 'The second click will be considered. Use the first one to zoom')
         points = plt.ginput(n=2, timeout=-1, show_clicks=True)
         x = int(np.rint(points[-1][0]))
         y = int(np.rint(points[-1][1]))
