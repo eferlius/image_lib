@@ -5,6 +5,7 @@ from . import coords_on_image
 from . import crop_image
 from . import filter_image
 from . import info_image
+from . import modify_image
 from . import operate_image
 from . import plots_image
 from . import rescale_image

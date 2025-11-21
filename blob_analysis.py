@@ -4,6 +4,12 @@ import numpy as np
 from . import plots_image
 from . import utils
 
+"""
+date: 2024-06-19 11:38:55
+note: use contour
+contours, hierarcy = cv2.findContours(frame[:,:,0], cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+"""
+
 def compute_line_inside_img(x, m, q, miny, maxy):
     y = m*x+q
     if y > miny and y < maxy:

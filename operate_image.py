@@ -5,6 +5,8 @@ from . import plots_image
 
 def erode(img, kernel, show = False, sharex = True, sharey = True,
                    nrows = 0, ncols = 0, mainTitle = None):
+    # EROSION_KERNEL = np.ones((5, 5), np.uint8) 
+    # DILATATION_KERNEL = np.ones((15, 15), np.uint8)
     img_ed = cv2.erode(img, kernel)
     if show:
         plots_image.plot_images_comparison(img, img_ed, sharex = sharex, sharey = sharey,
@@ -13,6 +15,8 @@ def erode(img, kernel, show = False, sharex = True, sharey = True,
 
 def dilate(img, kernel, show = False, sharex = True, sharey = True,
                    nrows = 0, ncols = 0, mainTitle = None):
+    # EROSION_KERNEL = np.ones((5, 5), np.uint8) 
+    # DILATATION_KERNEL = np.ones((15, 15), np.uint8)
     img_ed = cv2.dilate(img, kernel)
     if show:
         plots_image.plot_images_comparison(img, img_ed, sharex = sharex, sharey = sharey,

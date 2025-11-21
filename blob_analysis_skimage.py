@@ -4,6 +4,12 @@ import numpy as np
 import skimage
 from . import plots_image
 from . import utils
+
+"""
+date: 2024-06-19 11:38:55
+note: use contour
+contours, hierarcy = cv2.findContours(frame[:,:,0], cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+"""
              
 class detected_blobs_info:
     def __init__(self, img, method = 'DoH', **kwargs):

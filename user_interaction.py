@@ -167,7 +167,47 @@ def manual_point_definition(img, dx = 100, dy = 100, max_pixel_rescale = 800,
     if returnInt:
         return int(np.round(x)), int(np.round(y))
     else:
-        return x, y
+        return points[-1][0], points[-1][1]
+    
+def manual_points_definition(img, n_points = 3, dx = 100, dy = 100, max_pixel_rescale = 800,
+                            color = (255,255,255), thickness = 2, returnInt = False):
+    '''
+    Given an image, it is possible to extract the coordinates of n pixels clicking on them
+
+    Parameters
+    ----------
+    img : _type_
+        _description_
+    dx : int, optional
+        _description_, by default 100
+    dy : int, optional
+        _description_, by default 100
+    max_pixel_rescale : int, optional
+        _description_, by default 800
+    color : tuple, optional
+        _description_, by default (255,255,255)
+    thickness : int, optional
+        _description_, by default 2
+
+    Returns
+    -------
+    _type_
+        _description_
+    '''
+    orig_img = img.copy()
+
+
+    fig, ax = plots_image.plot_image(orig_img, mainTitle = 'Click {} points'.format(n_points))
+    points = plt.ginput(n=n_points, timeout=-1, show_clicks=True)
+    pp = np.array(points)
+        
+    if returnInt:
+        x = np.rint(pp[:,0]).astype(int)
+        y = np.rint(pp[:,1]).astype(int)
+    else:
+        x = pp[:,0]
+        y = pp[:,1]
+    return x, y
     
 def manual_crop_colour_description_tl_br(img_rgb, percentiles = [0.1, 0.25, 0.5, 0.75, 0.9], 
                                          max_pixel_rescale = 800, 
@@ -227,8 +267,7 @@ def manual_crop_colour_description_contour(img_rgb, percentiles = [0.1, 0.25, 0.
     '''
     User can tap nPoints on the image, the consecutive points will be connected 
     to create a contour. tl and br coordinates will be also obtained from the series of points
-    
-    
+        
     Parameters
     ----------
     img_rgb : matrix width*height*3 or matrix width*height*1

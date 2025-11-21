@@ -299,6 +299,9 @@ def substitute_values(img, mask, trueValueFin = None, falseValueFin = None, show
         # if mask_exp has depth 1 while trueValueFin and falseValueFin have depth 3: expand mask
         if (len(mask_exp.shape) == 2 and len(trueValueFin.shape) == 3 and len(falseValueFin.shape) == 3):
             mask_exp = np.expand_dims(mask_exp, axis = -1)
+        if (len(trueValueFin.shape) == 3 and len(falseValueFin.shape) == 3):
+            falseValueFin = falseValueFin.astype('uint8')
+            trueValueFin = trueValueFin.astype('uint8')
                 
         sub = np.where(mask_exp, trueValueFin, falseValueFin)
         
@@ -442,5 +445,5 @@ def extract_Kmeans(img, n_clusters = 3, highlightValue = [0,0,0],
         # plots_image.plot_image(segmentedImg, title = 'extracted with kmeans - {} clusters'.format(n_clusters))
         # plots_image.plot_image(highlightImg, title = 'extracted with kmeans - highlighted cluster')
 
-    return segmentedImg, highlightImg, mask
+    return segmentedImg, highlightImg, mask, centers
 

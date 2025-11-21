@@ -32,7 +32,7 @@ def crop_img_tl_br(img, tl, br, show = False, convertBGR2RGB = False):
         img = img[tl[1]:br[1], tl[0]:br[0]]
 
     if show:
-        plots_image.plot_image(img, title = 'cropped image from {} to {}'.format(tl, br), 
+        plots_image.plot_image(img, mainTitle = 'cropped image from {} to {}'.format(tl, br), 
                   convertBGR2RGB = convertBGR2RGB)
 
     return img

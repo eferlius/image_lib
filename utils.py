@@ -1,5 +1,11 @@
 import cv2
 
+def n_channels(img):
+    if len(img.shape) == 3:
+        return img.shape[2]
+    else:
+        return 1
+
 def colour_according_to_img(img):
     if len(img.shape) == 3:
         return [0]*img.shape[2]
